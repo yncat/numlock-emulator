@@ -1,0 +1,109 @@
+/*
+numLock emulator main inplementation
+Copyright (c) 2019 Yukio Nozawa
+*/
+
+#packopt name "numlockemu"//The file name of exe
+#include "hspext.as"
+#include "keyHook.hsp"
+#include "keyControl.as"
+#uselib "kernel32"
+#func beep "Beep" int, int
+
+//Settings
+toggleSwitchKeyCode=0x13//pause key
+
+onexit *exit
+khHook *onHook
+
+active=0
+//Try to avoid recursive calls of the hook label (I don't think it will actually cause any problems though)
+keyCode=-1//>-1 to fire
+keyAction=-1//>-1 to fire
+
+gosub*update
+repeat
+	await 10
+	//fire event
+	if keyCode>-1: if keyAction>=-1:gosub*fireKeyEvent
+	getkey trigger,toggleSwitchKeyCode
+	if trigger=0:lastTriggered=0
+	if trigger: if lastTriggered=0:lastTriggered=1:gosub*toggle
+loop
+
+*fireKeyEvent
+	keyControl keyCode,keyAction
+	keyCode=-1
+	keyAction=-1
+return
+
+*toggle
+	if active=0:active=1:else:active=0
+	beep 440+(active*440),100
+	gosub*update
+return
+
+*update
+	if active:title "Hook on":else:title "Hook off"
+return
+
+*exit
+	khUnhook
+end
+
+*onHook
+	if active=0: return 0
+	replaced=0
+	switch khKeyCode
+		case 'M':
+			replaced=1
+			keyCode=0x60
+			keyAction=khStat
+		swbreak
+		case 'J':
+			replaced=1
+			keyCode=0x61
+			keyAction=khStat
+		swbreak
+		case 'K':
+			replaced=1
+			keyCode=0x62
+			keyAction=khStat
+		swbreak
+		case 'L':
+			replaced=1
+			keyCode=0x63
+			keyAction=khStat
+		swbreak
+		case 'U':
+			replaced=1
+			keyCode=0x64
+			keyAction=khStat
+		swbreak
+		case 'I':
+			replaced=1
+			keyCode=0x65
+			keyAction=khStat
+		swbreak
+		case 'O':
+			replaced=1
+			keyCode=0x66
+			keyAction=khStat
+		swbreak
+		case '7':
+			replaced=1
+			keyCode=0x67
+			keyAction=khStat
+		swbreak
+		case '8':
+			replaced=1
+			keyCode=0x68
+			keyAction=khStat
+		swbreak
+		case '9':
+			replaced=1
+			keyCode=0x69
+			keyAction=khStat
+		swbreak
+	swend
+return replaced
